@@ -24,6 +24,16 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
+  # Strict Security: VPC Flow Logs
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+  flow_log_max_aggregation_interval    = 60
+
+  # Strict Security: Quarantine Default Security Group
+  manage_default_security_group               = true
+  default_security_group_deny_all_network_traffic = true
+
   # Tags required by EKS to discover subnets for Load Balancers
   public_subnet_tags = {
     "kubernetes.io/role/elb" = 1

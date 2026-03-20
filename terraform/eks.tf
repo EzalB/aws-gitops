@@ -9,9 +9,21 @@ module "eks" {
   subnet_ids               = module.vpc.private_subnets
   control_plane_subnet_ids = module.vpc.intra_subnets
 
-  # Enable OIDC for IRSA (IAM Roles for Service Accounts)
-  cluster_endpoint_public_access = true
-  enable_irsa                    = true
+  # Strict Security: Restrict public endpoint to known IPs (e.g., VPN/Bastion)
+  # For showcase purposes it remains open, but in production, replace with corporate CIDRs.
+  cluster_endpoint_public_access       = true
+  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"] # TODO: Change to your IP address
+
+  # Strict Security: Cluster Audit Logging
+  cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
+  # Strict Security: Kubernetes Secrets KMS Encryption
+  create_kms_key = true
+  cluster_encryption_config = {
+    resources = ["secrets"]
+  }
+
+  enable_irsa = true
 
   # Free Tier Friendly Managed Node Group
   eks_managed_node_groups = {

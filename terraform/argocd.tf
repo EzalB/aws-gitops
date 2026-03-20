@@ -29,7 +29,10 @@ resource "helm_release" "argocd" {
     server:
       replicas: 1
       service:
-        type: LoadBalancer # Automatically creates an AWS Classic Load Balancer for UI access
+        # Strict Security: ArgoCD is fundamentally internal tooling.
+        # NEVER expose this on a public LoadBalancer without SSO/Oauth2 Proxy.
+        # Access via: kubectl port-forward svc/argocd-server -n argocd 8080:443
+        type: ClusterIP
       resources:
         requests:
           cpu: 50m
@@ -67,8 +70,7 @@ resource "kubernetes_manifest" "nginx_app_sync" {
     spec = {
       project = "default"
       source = {
-        # USER MUST REPLACE THIS WITH THEIR REPO URL
-        repoURL        = "https://github.com/your-github-username/argocd-nginx-showcase.git" 
+        repoURL        = "https://github.com/EzalB/aws-gitops.git"
         targetRevision = "HEAD"
         path           = "helm/nginx-app"
       }
