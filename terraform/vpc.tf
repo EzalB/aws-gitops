@@ -3,9 +3,9 @@ data "aws_availability_zones" "available" {
 }
 
 locals {
-  name   = "gitops-nginx"
-  vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 2)
+  name = "${var.project_name}-${var.environment}"
+  azs  = slice(data.aws_availability_zones.available.names, 0, 2)
+  # vpc_cidr = "10.0.0.0/16"
 }
 
 module "vpc" {
@@ -13,11 +13,11 @@ module "vpc" {
   version = "~> 5.0"
 
   name = "${local.name}-vpc"
-  cidr = local.vpc_cidr
+  cidr = var.vpc_cidr
 
   azs             = local.azs
-  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
-  public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
+  private_subnets = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k)]
+  public_subnets  = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 8, k + 48)]
 
   enable_nat_gateway   = true
   single_nat_gateway   = true # Reduces cost for showcase
@@ -31,8 +31,9 @@ module "vpc" {
   flow_log_max_aggregation_interval    = 60
 
   # Strict Security: Quarantine Default Security Group
-  manage_default_security_group               = true
-  default_security_group_deny_all_network_traffic = true
+  manage_default_security_group  = true
+  default_security_group_ingress = []
+  default_security_group_egress  = []
 
   # Tags required by EKS to discover subnets for Load Balancers
   public_subnet_tags = {

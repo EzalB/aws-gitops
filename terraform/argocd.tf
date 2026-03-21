@@ -9,7 +9,7 @@ resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
-  version    = "6.7.1"
+  version    = var.argocd_chart_version
   namespace  = kubernetes_namespace.argocd.metadata[0].name
 
   wait = true
@@ -70,7 +70,7 @@ resource "kubernetes_manifest" "nginx_app_sync" {
     spec = {
       project = "default"
       source = {
-        repoURL        = "https://github.com/EzalB/aws-gitops.git"
+        repoURL        = "https://github.com/${var.github_org}/${var.github_repo}.git"
         targetRevision = "HEAD"
         path           = "helm/nginx-app"
       }

@@ -3,7 +3,7 @@ terraform {
 
   # For a true production environment, uncomment and configure the S3 backend.
   # For this showcase, you may use local state or configure your specific bucket and DynamoDB table.
-  
+
   # backend "s3" {
   #   bucket         = "my-terraform-state-bucket"
   #   key            = "gitops-nginx/terraform.tfstate"

@@ -20,10 +20,10 @@ resource "aws_iam_role" "github_actions" {
         }
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub": "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" : "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
           }
           StringEquals = {
-            "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:aud" : "sts.amazonaws.com"
           }
         }
       }
@@ -72,6 +72,3 @@ resource "aws_iam_role_policy_attachment" "github_actions_ecr" {
   policy_arn = aws_iam_policy.ecr_push.arn
 }
 
-output "github_actions_role_arn" {
-  value = aws_iam_role.github_actions.arn
-}

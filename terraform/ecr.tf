@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "app" {
-  name                 = "gitops-nginx-app"
+  name                 = "${var.project_name}-app"
   image_tag_mutability = "IMMUTABLE"
 
   image_scanning_configuration {
@@ -32,6 +32,3 @@ resource "aws_ecr_lifecycle_policy" "cleanup" {
   })
 }
 
-output "ecr_repository_url" {
-  value = aws_ecr_repository.app.repository_url
-}
