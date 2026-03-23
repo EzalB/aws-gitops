@@ -1,0 +1,90 @@
+# Default values for nginx-app.
+# This is a YAML-formatted file.
+
+replicaCount: 2
+
+image:
+  # USER MUST UPDATE THE REPOSITORY URL AFTER ECR CREATION
+  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/gitops-nginx-app
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # This tag is automatically updated by the CI pipeline.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  # e.g., For AWS IRSA (IAM Roles for Service Accounts)
+  annotations: {}
+  # The name of the service account to use.
+  name: "nginx-app-sa"
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 101 # nginx user
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 101 # nginx user
+  allowPrivilegeEscalation: false
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: "alb" # Uses AWS Load Balancer Controller (Assumes it's installed as an addon)
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # kubernetes.io/ingress.class: nginx (if using nginx-ingress instead)
+  hosts:
+    - host: ""      # Will route all traffic if no host is specified. Good for showcase on the ALB DNS.
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector:
+  Environment: showcase
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - nginx-app
+        topologyKey: topology.kubernetes.io/zone

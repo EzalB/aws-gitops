@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nginx-app
+description: A GitOps deployed NGINX application showcase
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
